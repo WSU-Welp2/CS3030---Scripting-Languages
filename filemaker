@@ -1,0 +1,58 @@
+#!/usr/bin/python
+
+import os
+import sys
+import random
+import shlex
+
+#Check for passed in arguments
+if len(sys.argv) != 4:
+	print('Usage: ./filemaker INPUTCOMMANDFILE OUTPUTFILE RECORDCOUNT')
+	exit(1)
+
+#Catch file opening errors
+try:
+	inputFile = open(sys.argv[1], "r")
+	outputFile = open(sys.argv[2], "w")
+except Exception as e:
+	print('Error: ' + str(e))
+	exit(1)
+
+commands = shlex.split(inputFile, True)
+commandList = []
+randomFiles = {}
+randomData = {}
+
+#Outputting header and storing file data in randomFiles
+for i in range(len(commands) - 1):
+	if commands[i] == 'HEADER':
+		outputFile.write(commands[i + 1].decode('string_escape'))
+	elif commands[i] == 'STRING' or commands[i] == 'REFER':
+		commandList.append(commands[i])
+		commandList.append(commands[i + 1])
+	elif commands[i] == 'NUMBER':
+		commandList.append(commands[i])
+		commandList.append(commands[i+1])
+		commandList.append(commands[i+2])
+		commandList.append(commands[i+3])
+	elif commands[i] == 'FILEWORD':
+		tempFile = open(commands[i+2], "r")
+		randomFiles[commands[i+2]] = tempFile.readlines()
+		tempFile.close()
+		commandList.append(commands[i])
+		commandList.append(commands[i+1])
+		commandList.append(commands[i+2])
+
+#Looping through commandList outputting data from commandList and randomData
+for j in range(int(sys.argv[3])):
+	for k in range(len(commandList)):
+		if commandList[k] == 'STRING':
+			outputFile.write(commandList[k+1].decode('string_escape'))
+		elif commandList[k] == 'REFER':
+			outputFile.write(str(randomData[commandList[k+1]]))
+		elif commandList[k] == 'NUMBER':
+			randomData[commandList[k+1]] = random.randint(int(commandList[k+2]), int(commandList[k+3]))
+			outputFile.write(str(randomData[commandList[k+1]]))
+		elif commandList[k] == 'FILEWORD':
+			randomData[commandList[k+1]] = randomFiles[commandList[k+2]][random.randint(0, len(randomFiles[commandList[k+2]]))].strip()
+			outputFile.write(randomData[commandList[k+1]])

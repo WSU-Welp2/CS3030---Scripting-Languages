@@ -1,0 +1,58 @@
+#!/bin/bash
+#Justin Wilkinson
+#Lab2 - Search and Report
+#CS3030 - Scripting
+
+#Checking for PATH input
+if [ -z "$1" ];then
+	echo Usage: srpt PATH
+	exit 1;
+fi
+
+echo SearchReport $HOSTNAME $1 `date`\n
+
+#Inserting new lines/file sizes into temp files
+find $1 \( -type d -fprintf /tmp/jwilkDir "\n" \) , \( -type f -fprintf /tmp/jwilkFile "\n" \) , \( -type f -size +500000c -fprintf /tmp/jwilkLarge "\n" \) , \( -type f -executable -fprintf /tmp/jwilkExec "\n" \) , \( -type l -fprintf /tmp/jwilkSymb "\n" \) , \( -type f -name '*.o' -fprintf /tmp/jwilkTemp "\n" \) , \( -type f -iname '*.jpg' -fprintf /tmp/jwilkGraphics "\n" \) , \( -type f -iname '*.gif' -fprintf /tmp/jwilkGraphics "\n" \) , \( -type f -iname '*.bmp' -fprintf /tmp/jwilkGraphics "\n" \) , \( -type f -mtime +364 -fprintf /tmp/jwilkTime "\n" \) , \( -type f -fprintf /tmp/jwilkSize "%s\n" \)
+
+#Setting variables
+dirCount=`wc -l /tmp/jwilkDir | cut -d" " -f1`
+fileCount=`wc -l /tmp/jwilkFile | cut -d" " -f1`
+sizeCount=`wc -l /tmp/jwilkLarge | cut -d" " -f1`
+execCount=`wc -l /tmp/jwilkExec | cut -d" " -f1`
+symbolicCount=`wc -l /tmp/jwilkSymb | cut -d" " -f1`
+tempCount=`wc -l /tmp/jwilkTemp | cut -d" " -f1`
+graphicsCount=`wc -l /tmp/jwilkGraphics | cut -d" " -f1`
+oldCount=`wc -l /tmp/jwilkTime | cut -d" " -f1`
+fileSizes=`awk '{tot=tot+$1}; END {print tot}' '/tmp/jwilkSize'`
+
+#Removing temp files
+rm /tmp/jwilkDir
+rm /tmp/jwilkFile
+rm /tmp/jwilkLarge
+rm /tmp/jwilkExec
+rm /tmp/jwilkSymb
+rm /tmp/jwilkTemp
+rm /tmp/jwilkGraphics
+rm /tmp/jwilkTime
+rm /tmp/jwilkSize
+
+#Printing results
+printf "Execution time $SECONDS \n"
+printf "Directories "
+printf "%'d\n" $(($dirCount-1))
+printf "Files "
+printf "%'d\n" $fileCount
+printf "Large files "
+printf "%'d\n" $sizeCount
+printf "Executable files "
+printf "%'d\n" $execCount
+printf "Sym links "
+printf "%'d\n" $symbolicCount
+printf "Temporary files "
+printf "%'d\n" $tempCount
+printf "Graphics files "
+printf "%'d\n" $graphicsCount
+printf "Old files "
+printf "%'d\n" $oldCount
+printf "TotalFileSize "
+printf "%'d\n" $fileSizes

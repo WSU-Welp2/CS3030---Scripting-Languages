@@ -1,0 +1,66 @@
+#!/usr/bin/python
+#Justin Wilkinson
+#Lab 5 - Database Loader
+#CS3030 - Scripting
+
+import os
+import sys
+import random
+import csv
+import sqlite3
+
+if len(sys.argv) != 3:
+	print('Usage: ./dbload INPUTCSV OUTPUTDB')
+	exit(1)
+
+def resetDB(curs):
+	#Deleting any tables from previous executions and remaking them
+	curs.execute('''drop table if exists students''')
+	curs.execute('''drop table if exists classes''')
+
+	curs.execute('''create table classes
+		     (id text, subjcode text, coursenumber text, termcode text)''')
+	curs.execute('''create table students
+		     (id text primary key unique, lastname text, firstname text, major text, email text,
+		      city text, state text, zip text)''') 
+
+def checkForStudent(curs, student):
+	#Checking for student in students if None then add them
+	curs.execute("SELECT * FROM students where id = '{0}'".format(student[0]))
+	if not curs.fetchone():
+		r = (student[0], student[1], student[2], student[3], student[4], student[7], student[8], student[9])
+		curs.execute('''INSERT INTO students (id, firstname, lastname, email, major, city, state, zip)
+				VALUES (?,?,?,?,?,?,?,?)''', r)
+
+def insertStudentClass(curs, classes):
+	#Inserting class information
+	r = (classes[0], classes[5].split(" ")[0], classes[5].split(" ")[1], classes[6])
+	curs.execute('''INSERT INTO classes (id, subjcode, coursenumber, termcode)
+			VALUES (?,?,?,?)''', r) 
+
+def main():
+	try:
+		conn = sqlite3.connect(sys.argv[2])
+		curs = conn.cursor()
+	except Exception as e:
+		print('Error: ' + str(e))
+		exit(1)
+
+	try:
+		reader = csv.reader(open(sys.argv[1], 'r' ), delimiter=',' , quotechar='"')
+	except Exception as e:
+		print('Error: ' + str(e))
+		exit(1)
+
+	resetDB(curs)
+
+	counter = 0
+	for row in reader:
+		counter += 1
+		if counter != 1:
+			checkForStudent(curs, row)
+			insertStudentClass(curs, row)
+	conn.commit()
+
+main()
+exit(0)		

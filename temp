@@ -1,0 +1,61 @@
+#!/usr/bin/python
+#Justin Wilkinson
+#Lab 4 - temp
+#CS3030 - Scripting
+
+#F->C calculation
+def fahrenheitToCelsius(fahrenheit):
+	celsius = round(((fahrenheit - 32.0) * (5.0/9.0)), 1)
+	print(str(fahrenheit) + " degrees Fahrenheit equals " + str(celsius) + " degrees Celsius\n")
+	return
+
+#C->F calculation
+def celsiusToFahrenheit(celsius):
+	fahrenheit = round((((9.0/5.0) * celsius) + 32.0), 1)
+	print(str(celsius) + " degrees Celsius equals " + str(fahrenheit) + " degrees Fahrenheit\n")
+	return
+
+#Input validation making sure input is a valid float
+def validateInput():
+	input = raw_input()
+	try:
+		input = float(input)
+		return input
+	except:
+		return 'invalid'
+
+#Main menu printer
+def printMenu():
+	print("Main Menu\n")
+	print("1.Fahrenheit to Celsius")
+	print("2.Celsius to Fahrenheit")
+	print("3.Exit program\n")
+	print("Please enter 1, 2, or 3:")
+
+#Main Program - Loops till user enters 3
+def mainProgram():
+	while True:
+		printMenu()
+		input = validateInput()
+		if(input == 3):
+			exit(0)
+		elif(input == 2):
+			print("Please enter degrees Celsius: ")
+			celsius = validateInput()
+			if(celsius != 'invalid'):
+				celsiusToFahrenheit(celsius)
+			else:
+				print("Invalid entry\n")
+		elif(input == 1):
+			print("Please enter degrees Fahrenheit: ")
+			fahrenheit = validateInput()
+			if(fahrenheit != 'invalid'):
+				fahrenheitToCelsius(fahrenheit)
+			else:
+				print("Invalid entry\n")
+		else:
+			print("Invalid entry\n")
+			
+#Display welcome message and call the main program
+print("Welcome to the CS 3030 Temperature Conversion Program")
+mainProgram()

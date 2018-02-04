@@ -1,0 +1,40 @@
+#!/bin/bash
+#Justin Wilkinson
+#Lab3 - Failed Login Report
+#CS3030 - Scripting
+
+#Outputting error
+if [ -z $1 ]; then
+	echo Usage: flog LOGFILE
+	exit 1
+fi
+
+#Filtering log file
+sed -n 's/.*Failed password for \([a-z0-9A-Z_]*\) .*/\1/p' $1 >/tmp/jwilk1
+sort </tmp/jwilk1 >/tmp/jwilk2
+rm /tmp/jwilk1
+
+uniq -c </tmp/jwilk2 >/tmp/jwilk3
+rm /tmp/jwilk2
+
+sort -k1,1nr -k2,2 /tmp/jwilk3 >/tmp/jwilk4
+rm /tmp/jwilk3
+
+sed 's/invalid/\&lt;UNKNOWN\&gt;/' </tmp/jwilk4 >/tmp/jwilk5
+rm /tmp/jwilk4
+
+echo '<html>' >>/tmp/jwilk6
+printf '<body><h1>' >>/tmp/jwilk6
+
+printf "Failed Login Attempts Report as of $(date)</h1>" >>/tmp/jwilk6
+cat /tmp/jwilk5| while read mycount myuserid; do
+	printf '\n<br />\t' >>/tmp/jwilk6
+	printf  "%'d %s" "$mycount" "$myuserid" >>/tmp/jwilk6
+done
+rm /tmp/jwilk5
+
+printf '</body></html>' >>/tmp/jwilk6
+
+#Removing new line feeds at start of file
+sed '/./,$!d' /tmp/jwilk6
+rm /tmp/jwilk6
